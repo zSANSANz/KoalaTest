@@ -18,7 +18,7 @@ func GetCustomers() (interface{}, interface{}) {
 }
 
 func GetCustomerById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, _ := strconv.Atoi(c.Param("customer_id"))
 	customer := models.Customer{}
 
 	if err := config.DB.Find(&customer, id).Error; err != nil {
@@ -37,10 +37,10 @@ func CreateCustomer(c echo.Context) (interface{}, interface{}) {
 }
 
 func UpdateCustomerById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, _ := strconv.Atoi(c.Param("customer_id"))
 	customer := models.Customer{}
 	c.Bind(&customer)
-	customer.ID = uint(id)
+	customer.CustomerId = uint(id)
 	if err := config.DB.Save(&customer).Error; err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func UpdateCustomerById(c echo.Context) (interface{}, interface{}) {
 }
 
 func DeleteCustomerById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, _ := strconv.Atoi(c.Param("customer_id"))
 	customer := models.Customer{}
 
 	if err := config.DB.Delete(&customer, id).Error; err != nil {
