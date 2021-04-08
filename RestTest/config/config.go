@@ -37,7 +37,7 @@ func InitDBTest() {
 			"",
 			"localhost",
 			"3306",
-			"retail_store_db",
+			"db_koala_test_v2",
 		)
 	var err error
 	DB, err = gorm.Open(mysql.Open(connectionString), &gorm.Config{})
@@ -49,9 +49,9 @@ func InitDBTest() {
 }
 
 func InitialMigration() {
-	DB.AutoMigrate(&models.User{}, &models.Address{}, &models.Courier{}, &models.Item{}, &models.ItemCategory{}, &models.Order{}, &models.OrderItem{}, &models.Payment{}, &models.PaymentService{}, &models.Shipment{}, &models.ShoppingCart{}, &models.ShoppingCartList{})
+	DB.AutoMigrate(&models.Customer{}, &models.Product{}, &models.PaymentMethod{}, &models.Order{}, &models.OrderDetail{})
 }
 
 func DropTable() {
-	DB.Migrator().DropTable(&models.User{}, &models.Address{}, &models.Courier{}, &models.Item{}, &models.ItemCategory{}, &models.Order{}, &models.OrderItem{}, &models.Payment{}, &models.PaymentService{}, &models.Shipment{}, &models.ShoppingCart{}, &models.ShoppingCartList{})
+	DB.Migrator().DropTable(&models.Customer{}, &models.Product{}, &models.PaymentMethod{}, &models.Order{}, &models.OrderDetail{})
 }
