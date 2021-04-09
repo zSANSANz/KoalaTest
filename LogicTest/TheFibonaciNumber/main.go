@@ -3,8 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println(fibonacciTopDown(5))
-	fmt.Println(fibonacciButtomUp(5))
+	for i:=0; i<=1000; i++ {
+		fmt.Println("fibonaci top down: ",fibonacciTopDown(i), "fibonaci bottom up: ", fibonacciButtomUp(i))
+	}
+	
+	fmt.Println()
 }
 
 func fibonacciTopDown(n int) int {
