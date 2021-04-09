@@ -2,95 +2,80 @@ package controllers
 
 import (
 	"net/http"
+
 	"retailStore/lib/db"
+	"retailStore/models"
 
 	"github.com/labstack/echo"
 )
 
 func GetProductsController(c echo.Context) error {
-	products, err := db.GetProducts()
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
+	products, e := db.GetProducts()
+	if e != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, e.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"code":    200,
 		"status":  "success",
-		"message": "success getting products",
-		"data":   products,
+		"message": "success get products",
+		"product": products,
 	})
 }
 
 func GetProductByIdController(c echo.Context) error {
-	product, err := db.GetProductById(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
+	id := c.Param("id")
+	product, getErr := db.GetProductById(id)
+	if getErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, getErr.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"code":    200,
 		"status":  "success",
-		"message": "success getting product by id",
-		"data":   product,
+		"message": "success get product by id",
+		"product": product,
 	})
 }
 
 func CreateProductController(c echo.Context) error {
-	product, err := db.CreateProduct(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
-	}
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"code":    200,
-		"status":  "success",
-		"message": "success product created",
-		"data":    product,
-	})
-}
-
-func UpdateProductByIdController(c echo.Context) error {
-	product, err := db.UpdateProductById(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
-	}
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"code":    200,
-		"status":  "success",
-		"message": "success deleting product by id",
-		"data":    product,
-	})
-}
-
-func DeleteProductByIdController(c echo.Context) error {
-	product, err := db.DeleteProductById(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
+	product := models.Product{}
+	c.Bind(&product)
+	products, e := db.CreateProduct(&product)
+	if e != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, e.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"code":    200,
 		"status":  "success",
-		"message": "success deleting product by id",
-		"data":   product,
+		"message": "success creating new product",
+		"product": products,
 	})
 }
 
+func UpdateProductByIdController(c echo.Context) error {
+	id := c.Param("id")
+	var UpdateProduct models.Product
+	c.Bind(&UpdateProduct)
+	product, updateErr := db.UpdateProduct(id, &UpdateProduct)
+	if updateErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, updateErr.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"code":    200,
+		"status":  "success",
+		"message": "success updating existing product by id",
+		"product": product,
+	})
+}
 
+func DeleteProductByIdController(c echo.Context) error {
+	id := c.Param("id")
+	if _, deleteErr := db.DeleteProduct(id); deleteErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, deleteErr.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"code":    200,
+		"status":  "success",
+		"message": "success deleting existing product by id",
+	})
+}
 

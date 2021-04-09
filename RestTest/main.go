@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"retailStore/config"
-	"retailStore/lib/seeders"
 	"retailStore/routes"
 
 	"github.com/joho/godotenv"
@@ -19,8 +18,8 @@ func main() {
 	//config.DropTable() //reset tables
 	config.InitialMigration()
 
-	seeders.Seed()
-	seeders.ItemSeed() // seeders for insert categories, paymentservices, and couries. for dev purposes
+	// seeders.Seed()
+	// seeders.ItemSeed() 
 
 	e := routes.New()
 

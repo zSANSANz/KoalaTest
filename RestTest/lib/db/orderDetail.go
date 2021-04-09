@@ -3,59 +3,54 @@ package db
 import (
 	"retailStore/config"
 	"retailStore/models"
-	"strconv"
-
-	"github.com/labstack/echo"
 )
 
-func GetOrderDetails() (interface{}, interface{}) {
-	orderDetails := []models.OrderDetail{}
+func GetOrderDetails() (interface{}, error) {
+	var orderDetail []models.OrderDetail
 
-	if err := config.DB.Find(&orderDetails).Error; err != nil {
-		return nil, err
-	}
-	return orderDetails, nil
-}
-
-func GetOrderDetailById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	orderDetail := models.OrderDetail{}
-
-	if err := config.DB.Find(&orderDetail, id).Error; err != nil {
+	if err := config.DB.Find(&orderDetail).Error; err != nil {
 		return nil, err
 	}
 	return orderDetail, nil
 }
 
-func CreateOrderDetail(c echo.Context) (interface{}, interface{}) {
-	orderDetail := models.OrderDetail{}
-	c.Bind(&orderDetail)
-	if err := config.DB.Create(&orderDetail).Error; err != nil {
+func GetOrderDetailById(id string) (interface{}, error) {
+	var orderDetail []models.OrderDetail
+
+	if err := config.DB.First(&orderDetail, "order_detail_id=?", id).Error; err != nil {
 		return nil, err
 	}
 	return orderDetail, nil
 }
 
-func UpdateOrderDetailById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	orderDetail := models.OrderDetail{}
-	c.Bind(&orderDetail)
-	orderDetail.ID = uint(id)
-	if err := config.DB.Save(&orderDetail).Error; err != nil {
+func CreateOrderDetail(orderDetail *models.OrderDetail) (interface{}, error) {
+	if err := config.DB.Save(orderDetail).Error; err != nil {
 		return nil, err
 	}
 	return orderDetail, nil
 }
 
-func DeleteOrderDetailById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	orderDetail := models.OrderDetail{}
-
-	if err := config.DB.Delete(&orderDetail, id).Error; err != nil {
+func UpdateOrderDetail(id string, orderDetail *models.OrderDetail) (interface{}, error) {
+	var existingOrderDetail models.OrderDetail
+	if err := config.DB.First(&existingOrderDetail, "order_detail_id=?", id).Error; err != nil {
 		return nil, err
+	}
+	existingOrderDetail.OrderId = orderDetail.OrderId
+	existingOrderDetail.ProductId = orderDetail.ProductId
+	existingOrderDetail.Qty = orderDetail.Qty
+	if updateErr := config.DB.Save(&existingOrderDetail).Where("order_detail_id=?", id).Error; updateErr != nil {
+		return nil, updateErr
+	}
+	return existingOrderDetail, nil
+}
+
+func DeleteOrderDetail(id string) (interface{}, error) {
+	var orderDetail models.OrderDetail
+	if err := config.DB.First(&orderDetail, "order_detail_id=?", id).Error; err != nil {
+		return nil, err
+	}
+	if deleteErr := config.DB.Delete(&orderDetail).Where("order_detail_id=?", id).Error; deleteErr != nil {
+		return nil, deleteErr
 	}
 	return orderDetail, nil
 }
-
-
-

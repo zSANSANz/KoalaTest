@@ -3,59 +3,53 @@ package db
 import (
 	"retailStore/config"
 	"retailStore/models"
-	"strconv"
-
-	"github.com/labstack/echo"
 )
 
-func GetCustomers() (interface{}, interface{}) {
-	customers := []models.Customer{}
+func GetPaymentMethods() (interface{}, error) {
+	var paymentMethod []models.PaymentMethod
 
-	if err := config.DB.Find(&customers).Error; err != nil {
+	if err := config.DB.Find(&paymentMethod).Error; err != nil {
 		return nil, err
 	}
-	return customers, nil
+	return paymentMethod, nil
 }
 
-func GetCustomerById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	customer := models.Customer{}
+func GetPaymentMethodById(id string) (interface{}, error) {
+	var paymentMethod []models.PaymentMethod
 
-	if err := config.DB.Find(&customer, id).Error; err != nil {
+	if err := config.DB.First(&paymentMethod, "payment_method_id=?", id).Error; err != nil {
 		return nil, err
 	}
-	return customer, nil
+	return paymentMethod, nil
 }
 
-func CreateCustomer(c echo.Context) (interface{}, interface{}) {
-	customer := models.Customer{}
-	c.Bind(&customer)
-	if err := config.DB.Create(&customer).Error; err != nil {
+func CreatePaymentMethod(paymentMethod *models.PaymentMethod) (interface{}, error) {
+	if err := config.DB.Save(paymentMethod).Error; err != nil {
 		return nil, err
 	}
-	return customer, nil
+	return paymentMethod, nil
 }
 
-func UpdateCustomerById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	customer := models.Customer{}
-	c.Bind(&customer)
-	customer.ID = uint(id)
-	if err := config.DB.Save(&customer).Error; err != nil {
+func UpdatePaymentMethod(id string, paymentMethod *models.PaymentMethod) (interface{}, error) {
+	var existingPaymentMethod models.PaymentMethod
+	if err := config.DB.First(&existingPaymentMethod, "payment_method_id=?", id).Error; err != nil {
 		return nil, err
 	}
-	return customer, nil
+	existingPaymentMethod.MethodName = paymentMethod.MethodName
+	existingPaymentMethod.Code = paymentMethod.Code
+	if updateErr := config.DB.Save(&existingPaymentMethod).Where("payment_method_id=?", id).Error; updateErr != nil {
+		return nil, updateErr
+	}
+	return existingPaymentMethod, nil
 }
 
-func DeleteCustomerById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	customer := models.Customer{}
-
-	if err := config.DB.Delete(&customer, id).Error; err != nil {
+func DeletePaymentMethod(id string) (interface{}, error) {
+	var paymentMethod models.PaymentMethod
+	if err := config.DB.First(&paymentMethod, "payment_method_id=?", id).Error; err != nil {
 		return nil, err
 	}
-	return customer, nil
+	if deleteErr := config.DB.Delete(&paymentMethod).Where("payment_method_id=?", id).Error; deleteErr != nil {
+		return nil, deleteErr
+	}
+	return paymentMethod, nil
 }
-
-
-

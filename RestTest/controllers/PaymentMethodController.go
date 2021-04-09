@@ -2,95 +2,80 @@ package controllers
 
 import (
 	"net/http"
+
 	"retailStore/lib/db"
+	"retailStore/models"
 
 	"github.com/labstack/echo"
 )
 
 func GetPaymentMethodsController(c echo.Context) error {
-	paymentMethods, err := db.GetPaymentMethods()
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
+	paymentMethods, e := db.GetPaymentMethods()
+	if e != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, e.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"code":    200,
 		"status":  "success",
-		"message": "success getting paymentMethods",
-		"data":   paymentMethods,
+		"message": "success get paymentMethods",
+		"paymentMethod": paymentMethods,
 	})
 }
 
 func GetPaymentMethodByIdController(c echo.Context) error {
-	paymentMethod, err := db.GetPaymentMethodById(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
+	id := c.Param("id")
+	paymentMethod, getErr := db.GetPaymentMethodById(id)
+	if getErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, getErr.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"code":    200,
 		"status":  "success",
-		"message": "success getting paymentMethod by id",
-		"data":   paymentMethod,
+		"message": "success get paymentMethod by id",
+		"paymentMethod": paymentMethod,
 	})
 }
 
 func CreatePaymentMethodController(c echo.Context) error {
-	paymentMethod, err := db.CreatePaymentMethod(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
-	}
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"code":    200,
-		"status":  "success",
-		"message": "success paymentMethod created",
-		"data":    paymentMethod,
-	})
-}
-
-func UpdatePaymentMethodByIdController(c echo.Context) error {
-	paymentMethod, err := db.UpdatePaymentMethodById(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
-	}
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"code":    200,
-		"status":  "success",
-		"message": "success deleting paymentMethod by id",
-		"data":    paymentMethod,
-	})
-}
-
-func DeletePaymentMethodByIdController(c echo.Context) error {
-	paymentMethod, err := db.DeletePaymentMethodById(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
+	paymentMethod := models.PaymentMethod{}
+	c.Bind(&paymentMethod)
+	paymentMethods, e := db.CreatePaymentMethod(&paymentMethod)
+	if e != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, e.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"code":    200,
 		"status":  "success",
-		"message": "success deleting paymentMethod by id",
-		"data":   paymentMethod,
+		"message": "success creating new paymentMethod",
+		"paymentMethod": paymentMethods,
 	})
 }
 
+func UpdatePaymentMethodByIdController(c echo.Context) error {
+	id := c.Param("id")
+	var UpdatePaymentMethod models.PaymentMethod
+	c.Bind(&UpdatePaymentMethod)
+	paymentMethod, updateErr := db.UpdatePaymentMethod(id, &UpdatePaymentMethod)
+	if updateErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, updateErr.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"code":    200,
+		"status":  "success",
+		"message": "success updating existing paymentMethod by id",
+		"paymentMethod": paymentMethod,
+	})
+}
 
+func DeletePaymentMethodByIdController(c echo.Context) error {
+	id := c.Param("id")
+	if _, deleteErr := db.DeletePaymentMethod(id); deleteErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, deleteErr.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"code":    200,
+		"status":  "success",
+		"message": "success deleting existing paymentMethod by id",
+	})
+}
 

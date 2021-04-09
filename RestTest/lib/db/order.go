@@ -3,59 +3,53 @@ package db
 import (
 	"retailStore/config"
 	"retailStore/models"
-	"strconv"
-
-	"github.com/labstack/echo"
 )
 
-func GetOrders() (interface{}, interface{}) {
-	orders := []models.Order{}
+func GetOrders() (interface{}, error) {
+	var order []models.Order
 
-	if err := config.DB.Find(&orders).Error; err != nil {
-		return nil, err
-	}
-	return orders, nil
-}
-
-func GetOrderById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	order := models.Order{}
-
-	if err := config.DB.Find(&order, id).Error; err != nil {
+	if err := config.DB.Find(&order).Error; err != nil {
 		return nil, err
 	}
 	return order, nil
 }
 
-func CreateOrder(c echo.Context) (interface{}, interface{}) {
-	order := models.Order{}
-	c.Bind(&order)
-	if err := config.DB.Create(&order).Error; err != nil {
+func GetOrderById(id string) (interface{}, error) {
+	var order []models.Order
+
+	if err := config.DB.First(&order, "order_id=?", id).Error; err != nil {
 		return nil, err
 	}
 	return order, nil
 }
 
-func UpdateOrderById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	order := models.Order{}
-	c.Bind(&order)
-	order.ID = uint(id)
-	if err := config.DB.Save(&order).Error; err != nil {
+func CreateOrder(order *models.Order) (interface{}, error) {
+	if err := config.DB.Save(order).Error; err != nil {
 		return nil, err
 	}
 	return order, nil
 }
 
-func DeleteOrderById(c echo.Context) (interface{}, interface{}) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	order := models.Order{}
-
-	if err := config.DB.Delete(&order, id).Error; err != nil {
+func UpdateOrder(id string, order *models.Order) (interface{}, error) {
+	var existingOrder models.Order
+	if err := config.DB.First(&existingOrder, "order_id=?", id).Error; err != nil {
 		return nil, err
+	}
+	existingOrder.CustomerId = order.CustomerId
+	existingOrder.OrderNumber = order.OrderNumber
+	if updateErr := config.DB.Save(&existingOrder).Where("order_id=?", id).Error; updateErr != nil {
+		return nil, updateErr
+	}
+	return existingOrder, nil
+}
+
+func DeleteOrder(id string) (interface{}, error) {
+	var order models.Order
+	if err := config.DB.First(&order, "order_id=?", id).Error; err != nil {
+		return nil, err
+	}
+	if deleteErr := config.DB.Delete(&order).Where("order_id=?", id).Error; deleteErr != nil {
+		return nil, deleteErr
 	}
 	return order, nil
 }
-
-
-

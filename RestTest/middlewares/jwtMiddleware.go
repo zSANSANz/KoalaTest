@@ -8,32 +8,31 @@ import (
 	"github.com/labstack/echo"
 )
 
-func CreateToken(userId int, userRole string) (string, error) {
+func CreateToken(customerId string) (string, error) {
 	claims := jwt.MapClaims{}
-	claims["Role"] = userRole
-	claims["userId"] = userId
+	claims["authorized"] = true
+	claims["customerId"] = customerId
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("SECRET_JWT")))
 }
 
-func ExtractTokenUserId(c echo.Context) float64 {
-	user := c.Get("user").(*jwt.Token)
-	if user.Valid {
-		claims := user.Claims.(jwt.MapClaims)
-		userId := claims["userId"].(float64)
-		return userId
+func ExtractTokenCustomerId(c echo.Context) float64 {
+	customer := c.Get("customer").(*jwt.Token)
+	if customer.Valid {
+		claims := customer.Claims.(jwt.MapClaims)
+		customerId := claims["customerId"].(float64)
+		return customerId
 	}
 	return 0
 }
 
-func ExtractTokenUserRole(c echo.Context) string {
-	user := c.Get("user").(*jwt.Token)
-	if user.Valid {
-		claims := user.Claims.(jwt.MapClaims)
-		userRole := claims["Role"].(string)
-		return userRole
+func ExtractTokenCustomerRole(c echo.Context) string {
+	customer := c.Get("customer").(*jwt.Token)
+	if customer.Valid {
+		claims := customer.Claims.(jwt.MapClaims)
+		customerRole := claims["Role"].(string)
+		return customerRole
 	}
 	return ""
 }

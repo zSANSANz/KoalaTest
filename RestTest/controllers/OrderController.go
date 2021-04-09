@@ -2,95 +2,80 @@ package controllers
 
 import (
 	"net/http"
+
 	"retailStore/lib/db"
+	"retailStore/models"
 
 	"github.com/labstack/echo"
 )
 
 func GetOrdersController(c echo.Context) error {
-	orders, err := db.GetOrders()
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
+	orders, e := db.GetOrders()
+	if e != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, e.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"code":    200,
 		"status":  "success",
-		"message": "success getting orders",
-		"data":   orders,
+		"message": "success get orders",
+		"order": orders,
 	})
 }
 
 func GetOrderByIdController(c echo.Context) error {
-	order, err := db.GetOrderById(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
+	id := c.Param("id")
+	order, getErr := db.GetOrderById(id)
+	if getErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, getErr.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"code":    200,
 		"status":  "success",
-		"message": "success getting order by id",
-		"data":   order,
+		"message": "success get order by id",
+		"order": order,
 	})
 }
 
 func CreateOrderController(c echo.Context) error {
-	order, err := db.CreateOrder(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
-	}
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"code":    200,
-		"status":  "success",
-		"message": "success order created",
-		"data":    order,
-	})
-}
-
-func UpdateOrderByIdController(c echo.Context) error {
-	order, err := db.UpdateOrderById(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
-	}
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"code":    200,
-		"status":  "success",
-		"message": "success deleting order by id",
-		"data":    order,
-	})
-}
-
-func DeleteOrderByIdController(c echo.Context) error {
-	order, err := db.DeleteOrderById(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status":  "failed",
-			"message": "bad request",
-		})
+	order := models.Order{}
+	c.Bind(&order)
+	orders, e := db.CreateOrder(&order)
+	if e != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, e.Error())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"code":    200,
 		"status":  "success",
-		"message": "success deleting order by id",
-		"data":   order,
+		"message": "success creating new order",
+		"order": orders,
 	})
 }
 
+func UpdateOrderByIdController(c echo.Context) error {
+	id := c.Param("id")
+	var UpdateOrder models.Order
+	c.Bind(&UpdateOrder)
+	order, updateErr := db.UpdateOrder(id, &UpdateOrder)
+	if updateErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, updateErr.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"code":    200,
+		"status":  "success",
+		"message": "success updating existing order by id",
+		"order": order,
+	})
+}
 
+func DeleteOrderByIdController(c echo.Context) error {
+	id := c.Param("id")
+	if _, deleteErr := db.DeleteOrder(id); deleteErr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, deleteErr.Error())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"code":    200,
+		"status":  "success",
+		"message": "success deleting existing order by id",
+	})
+}
 
