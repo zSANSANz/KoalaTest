@@ -9,5 +9,4 @@ type PaymentMethod struct {
 	MethodName 			string         `gorm:"type:varchar(70);not null" json:"method_name" form:"method_name"`
 	Code				string         `gorm:"type:varchar(10);not null" json:"code" form:"code"`
 	CreatedDate   		time.Time      `json:"created_date" form:"created_date"`
-	Order   			Order	   	   `json:"order" form:"order"`
 }

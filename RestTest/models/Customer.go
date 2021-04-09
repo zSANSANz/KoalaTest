@@ -15,5 +15,5 @@ type Customer struct {
 	Password 			string         `gorm:"type:varchar(400);not null" json:"password" form:"password"`
 	CreatedDate   		time.Time      `gorm:"not null" json:"created_date" form:"created_date"`
 	Token	 			string		   `json:"token" form:"token"`
-	Order   			Order	   	   `json:"order" form:"order"`
+	
 }
