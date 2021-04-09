@@ -10,4 +10,5 @@ type OrderDetail struct {
 	ProductId			string         `gorm:"type:varchar(64);unique;not null" json:"company_name" form:"company_name"`
 	Qty					uint		   `json:"created_at" form:"created_at"`
 	CreatedDate			time.Time      `json:"created_at" form:"created_at"`
+	Product   			Product	   	   `json:"product" form:"product"`
 }
