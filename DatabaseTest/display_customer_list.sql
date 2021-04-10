@@ -1,0 +1,1 @@
+SELECT * FROM `customers`,`orders` WHERE `customers`.`customer_id` = `orders`.`customer_id`
