@@ -30,566 +30,430 @@ o token is only one use.
 o order number generated with format PO-123/IX/2020 (IX is
 current month)(2020 is current year),(123 reset per month).
 o order detail can be more than one
-# Simple Inventory API
-This is a simple API
+# Alta Store REST API (ASRA)
 
-## Version: 1.2
+## Overview
 
-**Contact information:**  
-you@your-company.com  
+KoalaRetail is REST-API specifically build to support online store system of ALTA. ASRA provides functionality that allows developers to behave either as customer or admin. ASRA is created using Golang, Gorm, and MYSQL as database.
 
-**License:** [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
+The MVP of KoalaRetail is :
 
-### /items
+* Login and register customers
+* Customers can view list product
+* Customers can add product to order
+* Customers can delete the product list from the order detail
+* Customers can make payment transactions
 
-#### GET
-##### Summary
+And this ERD of KoalaRetail is like this :
 
-item list
+![alt text](https://github.com/zSANSANz/KoalaTest/blob/main/RestTest/erd.PNG)
 
-##### Description
+## Tutorial
 
-By passing in the appropriate options, you can search for
-certain available item
+We provide another documentation using swagger to make it easy to understand the basic of API.
 
-##### Parameters
+How to run this project :
 
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| items_id | query | pass an optional search string for looking up item | No | string |
-| category | query | pass an optional search string for looking up item | No | string |
-| name | query | pass an optional search string for looking up item | No | string |
-| limit | query | maximum number of records to return | No | integer (uint32) |
-| minPrice | query | minimum price | No | integer (uint32) |
-| maxPrice | query | maximum price | No | integer (uint32) |
-| sort | query | pass an optional search string for looking up item | No | string |
+1. git clone `https://github.com/zSANSANz/KoalaTest.git`
+2. cd `KoalaTest` and run `go install`
+3. setup envirotment, rename file `.env.example` to `.env`. And setup this variabel envirotment.
+4. after finished install this module, run command `go run swagger.go` for running this documentation to browser like this `localhost:8080/swaggerui`
+5. run command `go run main.go` to running this server like this `localhost:8000`
+6. run command `go test ./controller/ -cover` for running unit testing
 
-##### Responses
+## HTTP requests
 
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 200 | search results matching criteria | object |
-| 400 | bad input parameter | object |
+There are 4 basic HTTP requests that you can use in this API:
 
-#### POST
-##### Summary
+* `POST` Create a resource
+* `PUT` Update a resource
+* `GET` Get a resource or list of resources
+* `DELETE` Delete a resource
 
-adds an inventory item
+## HTTP Responses
 
-##### Description
+Each response will include a code(repsonse code),message,status and data object that can be single object or array depending on the query.
 
-Adds an item to the system
+## HTTP Response Codes
 
-##### Parameters
+Each response will be returned with one of the following HTTP status codes:
 
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| inventoryItem | body | Inventory item to add | No | [Item](#item) |
+* `200` `OK` The request was successful
+* `400` `Bad Request` There was a problem with the request (security, malformed, data validation, etc.)
+* `404` `Not found` An attempt was made to access a resource that does not exist in the API
+* `500` `Server Error` An error on the server occurred
 
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 201 | item created | [Response](#response) |
-| 400 | invalid input, object invalid | [Response](#response) |
-| 409 | --- | [Response](#response) |
-
-#### PUT
-##### Summary
-
-edit an inventory item
-
-##### Description
-
-edit an item to the system
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| inventoryItem | body | Inventory item to add | No | [Item](#item) |
-
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 201 | item updated | [Response](#response) |
-| 400 | invalid input, object invalid | [Response](#response) |
-
-### /items/{item_name}
-
-#### GET
-##### Summary
-
-item list
-
-##### Description
-
-By passing in the appropriate options, you can search for
-certain available item
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| item_name | path | item name user to get | Yes | string |
-
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 200 | search results matching criteria | object |
-| 400 | bad input parameter | object |
-
-### /shopping_carts
-
-#### GET
-##### Summary
-
-shopping cart list
-
-##### Description
-
-By passing in the appropriate options, you can get items in shopping cart
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| Authorization | header | pass an required search string for looking up item in shopping cart | Yes | string |
-
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 200 | ok results matching criteria | [Response](#response) |
-| 400 | bad input parameter | [Response](#response) |
-
-#### POST
-##### Summary
-
-adds an item to shopping cart
-
-##### Description
-
-Adds an item to the system
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| authorization | header | token | Yes | string |
-| item_id | body | Inventory item to add | Yes | object |
-
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 201 | item created | [Response](#response) |
-| 400 | invalid input, object invalid | [Response](#response) |
-| 409 | an existing item already exists | [Response](#response) |
-
-#### DELETE
-##### Summary
-
-delete an item from shopping cart
-
-##### Description
-
-delete an item from the system
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| authorization | header | token | Yes | string |
-| item_id | body | Inventory item to add | Yes | object |
-
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 201 | item deleted | [Response](#response) |
-| 400 | invalid input, object invalid | [Response](#response) |
-| 409 | item not exist | [Response](#response) |
-
-### /orders/{order_id}
-
-#### GET
-##### Summary
-
-shopping cart list
-
-##### Description
-
-By passing in the appropriate options, you can get items in shopping cart
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| order_id | path |  | Yes | integer |
-
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 200 | search results matching criteria | object |
-| 400 | bad input parameter | object |
-
-### /orders
-
-#### GET
-##### Summary
-
-shopping cart list
-
-##### Description
-
-By passing in the appropriate options, you can get items in shopping cart
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| Authorization | header | pass an required search string for looking up ite  in shopping cart | Yes | string |
-| order_id | query | pass an order_id | No | integer |
-
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 200 | search results matching criteria | object |
-| 400 | bad input parameter | object |
-
-#### POST
-##### Summary
-
-adds an order
-
-##### Description
-
-Adds an order to the system
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| authorization | header | token | Yes | string |
-| item | body | Inventory item to add | Yes | object |
-
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 201 | order created | [Response](#response) |
-| 400 | invalid input, object invalid | [Response](#response) |
-
-#### DELETE
-##### Summary
-
-delete order item
-
-##### Description
-
-delete an order from the system
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| authorization | header | token | Yes | string |
-| order_id | body | Inventory item to add | Yes | object |
-
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 201 | order deleted | [Response](#response) |
-| 400 | invalid input, object invalid | [Response](#response) |
-| 409 | order not exist | [Response](#response) |
+## API Documentation
 
 ### /register
 
 #### POST
 ##### Summary
 
-register user account
+register customer
 
 ##### Description
+passing customer data to register customer
 
-register user account to the system
-
-##### Parameters
+### Parameter
 
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ---- |
-| register user | body | register user account | Yes | [RegisterUser](#registeruser) |
+| username | body | customer usernmae | Yes | string
+| email | body | customer email | Yes | string |
+| password | body | customer password | Yes | string |
 
 ##### Responses
+| Code | Description | 
+| ---- | ----------- |
+| 200 | success register customer |
+| 500 | error registration customer | 
 
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 201 | account created | object |
-| 400 | invalid input, object invalid | object |
+#### Request Body Parameter Example
+```json
+{
+    "username":"lisa233",
+    "email":"lisa@gmail5.com",
+    "password":"312457"
+}
+```
+
+#### Response Body Example
+```json
+{    
+    "code": 200,
+    "message": "success register customers",
+    "status": "success"
+}
+```
 
 ### /login
 
 #### POST
 ##### Summary
 
-login user account
+login as customer
 
 ##### Description
+passing email and password to login as customer
 
-login user account to the system
-
-##### Parameters
-
+####  Parameter
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ---- |
-| user login | body | login user account | Yes | [UserLogin](#userlogin) |
+| email | body | customer email | Yes | string |
+| password | body | customer password | Yes | string |
 
 ##### Responses
+| Code | Description | 
+| ---- | ----------- |
+| 200 | success login customer |
+| 400 | error login(invalid email/password) | 
 
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 200 | login access granted | object |
-| 400 | incorrect username/password | object |
+#### Request Body Parameter Example
+```json
+{
+   "email":"susi@gmail.com",
+   "password":"john123"
+}
+```
 
-### /payments
+#### Response Body Example
+```json
+{    
+    "code": 200,
+    "message": "success login customer",
+    "status": "success",
+    "data": {
+        "id": 1,
+        "email": "susi@gmail.com",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTczNDg0ODgsInVzZXJJZCI6MX0.C4pvmawkwNP-SVJlIA0qbTct3qen4PPbhtHK9XRRpts"
+    }
+}
+```
+### /customers
 
-#### GET
+### /customers/{id}
+
+#### PUT
 ##### Summary
 
-payment list
+Update Customer Data
 
 ##### Description
+passing several data to update  customer data 
 
-By passing in the appropriate options, you can search for
-certain available payment
-
-##### Parameters
-
+####  Parameter
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ---- |
-| authorization | header |  | Yes | string |
-| payment_id | query | pass an optional search string for looking up item | No | string |
-| order_id | query | order id from order | No | string |
-| customer_id | query | customer id from customer | No | string |
-| status | query | status | No | integer (uint32) |
+| id | path | customer id | Yes | string |
+| email | body | customer email | No | string |
+| adresss | body | customer address | No | string |
+| bank_name | body | customer email | No | string |
+| bank_account_number | body | customer address | No | string |
 
 ##### Responses
+| Code | Description | 
+| ---- | ----------- |
+| 200 | success update customer data |
+| 400 | error update data| 
 
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 200 | search results matching criteria | object |
-| 400 | bad input parameter | object |
+#### Request Body Parameter Example
+```json
+{
+    "email":"32ibu@gmail.com",
+    "address": "jalan ahmad yani",
+    "bank_name": "BCA",
+    "bank_account_number": "23232323"
+}
+```
 
-### /payments/{payment_id}
+#### Response Body Example
+```json
+{    
+    "code": 200,
+    "message": "success update profil customer",
+    "status": "success"
+}
+```
 
-#### GET
+### /products
+
+### /products?category={id}
+
+##### GET
 ##### Summary
 
-payment list
+Get products
 
 ##### Description
+Get all product based on category, if no id is passed then it will return all product in the store
 
-By passing in the appropriate options, you can search for
-certain available payment
-
-##### Parameters
-
+#### Parameter
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ---- |
-| authorization | header |  | Yes | string |
-| payment_id | path | pass an optional search integer for looking up payment | Yes | integer |
+| id | query | category id | No | int |
 
 ##### Responses
+| Code | Description | 
+| ---- | ----------- |
+| 200 | success get products |
+| 400 | error bad request | 
 
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 200 | search results matching criteria | object |
-| 400 | bad input parameter | object |
 
-### /courier
+#### Response Body Example
+```json
+{    
+    "code": 200,
+    "message": "success get product",
+    "status": "success",
+    "data":  [
+        {
+            "id": 1,
+            "name": "Yonex Zerox",
+            "categories_id": 4,
+            "description": "Raket tercepat di Asia",
+            "quantity": 30,
+            "price": 45000,
+            "unit": "pcs",
+            "CreatedAt": "2021-03-28T20:01:40.21+07:00",
+            "UpdatedAt": "2021-03-28T20:01:40.21+07:00"
+        }
+    ]
+}
+```
 
-#### GET
-##### Summary
-
-courier list
-
-##### Description
-
-By passing in the appropriate options, you can search for
-certain available courier
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| authorization | header |  | Yes | string |
-
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 200 | search results matching criteria | [ [Courier](#courier) ] |
-| 400 | bad input parameter |  |
-
-### /address
-
-#### GET
-##### Summary
-
-get address
-
-##### Parameters
-
-| Name | Located in | Description | Required | Schema |
-| ---- | ---------- | ----------- | -------- | ---- |
-| authorization | header |  | Yes | string |
-| address_id | query | pass an optional search string for looking up address | No | integer |
-| name | query | pass an optional search string for looking up address | No | string |
-
-##### Responses
-
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 200 | search results matching criteria | object |
-| 400 | bad input parameter | object |
+### /cartitems
 
 #### POST
 ##### Summary
 
-adds an address item
+Adding cartitems to carts
 
 ##### Description
+Adding product that customer wants to buy into their cart
 
-Adds an address to the system
-
-##### Parameters
-
+####  Parameter
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ---- |
-| authorization | header | authorization token | Yes | string |
-| addressItem | body | address item to add | Yes | object |
+| carts_id | body | customer cart id | Yes | int |
+| products_id | body | product id | Yes | int |
+| quantity | body | quantity of product | Yes | int |
 
 ##### Responses
+| Code | Description | 
+| ---- | ----------- |
+| 200 | success insert cartitems |
+| 400 | invalid input| 
+| 500 | product/cart not exist|
 
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 201 | address created | object |
-| 400 | invalid input, object invalid | object |
-| 409 | an existing address already exists | object |
+#### Request Body Parameter Example
+```json
+{
+    "carts_id":4,
+    "products_id":9,
+    "quantity":3
+}
+```
 
-### /address/{address_id}
+#### Response Body Example
+```json
+{    
+    "code": 200,
+    "status": "success",
+    "message": "success insert cartitems"
+}
+```
+
+#### /cartitems?cart={cartid}
 
 #### GET
 ##### Summary
 
-get address
+get all cartitems inside specific cart
 
-##### Parameters
+##### Description
+get all cartitems that is inside usercart
 
+####  Parameter
 | Name | Located in | Description | Required | Schema |
 | ---- | ---------- | ----------- | -------- | ---- |
-| authorization | header |  | Yes | string |
-| address_id | path | pass an optional search string for looking up address | Yes | integer |
+| carts_id | query | customer cart id | Yes | int |
 
 ##### Responses
+| Code | Description | 
+| ---- | ----------- |
+| 200 | success get cartitems |
+| 400 | bad request| 
 
-| Code | Description | Schema |
-| ---- | ----------- | ------ |
-| 200 | search results matching criteria | object |
-| 400 | bad input parameter | object |
 
-### Models
 
-#### Item
+#### Response Body Example
+```json
+{    
+    "code": 200,
+    "status": "success",
+    "message": "Success Get Cartitems",
+    "data": [
+        {
+            "id": 29,
+            "carts_id": 4,
+            "products_id": 9,
+            "name": "Yonex e545",
+            "price": 45000,
+            "quantity": 3
+        }
+    ]
+}
+```
 
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| id | integer (uint32) | _Example:_ `69` | No |
-| name | string | _Example:_ `"Widget Adapter"` | No |
-| description | string | _Example:_ `"ini adalah buku budi"` | No |
-| category | string |  | No |
-| price | integer (uint32) |  | No |
+#### /cartitems/:cartitemid
 
-#### shopping_cart
+#### DELETE
+##### Summary
 
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| shopping_cart | array |  |  |
+Delete specific cartitem
 
-#### order
+##### Description
+Delete specific cartitem based on cartitemid
 
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| order_id | integer |_Example:_ `1` | No |
-| courier | object |  | No |
-| total_amount | integer |  | No |
-| address | string |  | No |
-| payment_id | string |  | No |
-| status | string |  | No |
+####  Parameter
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ---- |
+| cartitemid | path |  id of cartitem to be deleted | Yes | int |
 
-#### RegisterUser
+##### Responses
+| Code | Description | 
+| ---- | ----------- |
+| 200 | success delete cartitems |
+| 400 | error deleting cartitems(wrong cartitem id etc)| 
 
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| username | string |  | No |
-| nama | string |  | No |
-| email | string | _Example:_ `"email@email.com"` | No |
-| phone_number | string |_Example:_ `"+628999"` | No |
-| password | string | _Example:_ `"password123"` | No |
 
-#### UserLogin
 
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| username | string |  | No |
-| password | string | _Example:_ `"password123"` | No |
+#### Response Body Example
+```json
+{    
+     "code": 200,
+     "message": "cartitems succesfully deleted",
+     "status": "success"
+}
+```
 
-#### Payment
+### /orders
 
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| payment_id | integer |  | No |
-| transfer_code | string |  | No |
-| order_id | integer |  | No |
-| customer_id | integer |  | No |
-| status | string |  | No |
-| total_amount | integer |  | No |
+#### POST
+##### Summary
 
-#### Courier
+Creating order from customer
 
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| courier_id | integer |  | No |
-| company_name | string |  | No |
+##### Description
+When customer checkout order and payment will be created, and customer cart item will be moved to checkout item
 
-#### Address
+####  Parameter
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ---- |
+| customers_id | body | customer id | Yes | int |
+| courier_id | body | courier id | Yes | int |
+| payment_method | body | method of payment | Yes | string |
+| payment_start_date | body | date in format(yyyy-mm-dd hh:mm:ss)| Yes | string |
+| payment_end_date | body | date in format(yyyy-mm-dd hh:mm:ss)| Yes | string |
+| payment_status | body | status of payment | Yes | string |
+| payment_amount | body | total payment amount | Yes | int |
 
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| address_id | string |  | No |
-| name | string |  | No |
-| address | string |  | No |
 
-#### Response
+##### Responses
+| Code | Description | 
+| ---- | ----------- |
+| 200 | success create order |
+| 400 | bad request(customer not exist,etc)| 
 
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| code | integer |  | No |
-| status | string |  | No |
-| message | string |  | No |
+#### Request Body Parameter Example
+```json
+{
+    "customers_id":4,
+     "couriers_id":1,
+     "payment_method":" BCA",
+     "payment_start_date":"2021-03-29 10:42:44.710",
+     "payment_end_date" : "2021-03-30 10:42:44.710",
+     "payment_status": "waiting",
+     "payment_amount" : 345000
+}
+```
 
-#### CustomerInfo
+#### Response Body Example
+```json
+{    
+    "code": 200,
+    "message": "success insert order",
+    "status": "success"
+}
+```
+### /payments/:id
 
-| Name | Type | Description | Required |
-| ---- | ---- | ----------- | -------- |
-| customer_id | integer |  | No |
-| username | string |  | No |
-| email | string |  | No |
-| no_hp | string |  | No |
-| token | string |  | No |
+#### PUT
+##### Summary
+
+Update payment status
+
+##### Description
+Update payment status when customer finishing their payment for the product
+
+####  Parameter
+| Name | Located in | Description | Required | Schema |
+| ---- | ---------- | ----------- | -------- | ---- |
+| id | path | payment id that needs to be updated | Yes | int |
+
+##### Responses
+| Code | Description | 
+| ---- | ----------- |
+| 200 | success update payment |
+| 400 | error update payment(payment id not exist etc)| 
+
+
+#### Response Body Example
+```json
+{    
+    "code": 200,
+    "message": "success update payments",
+    "status": "success"
+}
+```
