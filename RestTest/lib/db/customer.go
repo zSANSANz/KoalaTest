@@ -4,6 +4,8 @@ import (
 	"retailStore/config"
 	"retailStore/models"
 	"retailStore/middlewares"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func GetCustomers() (interface{}, error) {
@@ -60,7 +62,17 @@ func DeleteCustomer(id string) (interface{}, error) {
 }
 
 func RegisterCustomer(customer *models.Customer) (interface{}, error) {
-	if err := config.DB.Create(customer).Error; err != nil {
+	var customers models.Customer
+	bytes, _ := bcrypt.GenerateFromPassword([]byte(customer.Password), 10)
+	fmt.Println(string(bytes))
+	customers.CustomerId = customer.CustomerId
+	customers.CustomerName = customer.CustomerName
+	customers.Email = customer.Email
+	customers.PhoneNumber = customer.PhoneNumber
+	customers.Salt = customer.Salt
+	customers.Password = string(bytes)
+
+	if err := config.DB.Create(customers).Error; err != nil {
 		return nil, err
 	}
 
@@ -70,7 +82,7 @@ func RegisterCustomer(customer *models.Customer) (interface{}, error) {
 		return nil, err
 	}
 
-	if err := config.DB.Save(customer).Error; err != nil {
+	if err := config.DB.Save(customers).Error; err != nil {
 		return nil, err
 	}
 
@@ -78,17 +90,20 @@ func RegisterCustomer(customer *models.Customer) (interface{}, error) {
 }
 
 func LoginCustomer(customer *models.Customer) (interface{}, error) {
-	var err error
-	if err = config.DB.Where("email = ? AND password = ?", customer.Email, customer.Password).First(customer).Error; err != nil {
+	var customers models.Customer
+
+	if err := config.DB.First(&customers, "email=?", customer.Email).Error; err != nil {
+		return nil, err
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(customers.Password), []byte(customer.Password))
+
+	if err != nil {
 		return nil, err
 	}
 
 	customer.Token, err = middlewares.CreateToken(string(customer.CustomerId))
 	if err != nil {
-		return nil, err
-	}
-
-	if err := config.DB.Save(customer).Error; err != nil {
 		return nil, err
 	}
 
